@@ -10,6 +10,8 @@
 #include "v8world/Controller.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -110,12 +112,18 @@ public:
 	}
 
 	// SIZE 0x8
-	class AddIterator : public std::_Outit
+  class AddIterator
 	{
 	private:
 		Selection* selection; // 0x4
 
 	public:
+     typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef std::ptrdiff_t difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 		AddIterator(Selection* selection) : selection(selection) {}
 
 		AddIterator& operator*() { return *this; }
@@ -131,12 +139,18 @@ public:
 	};
 
 	// SIZE 0x8
-	class RemoveIterator : public std::_Outit
+   class RemoveIterator
 	{
 	private:
 		Selection* selection; // 0x4
 
 	public:
+      typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef std::ptrdiff_t difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 		RemoveIterator(Selection* selection) : selection(selection) {}
 
 		RemoveIterator& operator*() { return *this; }
@@ -152,12 +166,18 @@ public:
 	};
 
 	// SIZE 0x8
-	class ToggleIterator : public std::_Outit
+   class ToggleIterator
 	{
 	private:
 		Selection* selection; // 0x4
 
 	public:
+      typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef std::ptrdiff_t difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 		ToggleIterator(Selection* selection) : selection(selection) {}
 
 		ToggleIterator& operator*() { return *this; }

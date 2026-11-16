@@ -19,6 +19,9 @@
 #include "G3D/G3DGameUnits.h"
 #include "G3D/BinaryFormat.h"
 #include <string>
+#if defined(_MSC_VER) && defined(_M_X64)
+#include <intrin.h>
+#endif
 
 #ifdef G3D_OSX
 #	include <CoreServices/CoreServices.h>
@@ -317,6 +320,9 @@ private:
 
 #ifdef _MSC_VER
     inline uint64 System::getCycleCount() {
+#if defined(_M_X64)
+        return __rdtsc();
+#else
         uint32 timehi, timelo;
 
         // Use the assembly instruction rdtsc, which gets the current
@@ -329,6 +335,7 @@ private:
             }
 
         return ((uint64)timehi << 32) + (uint64)timelo;
+#endif
     }
 
 #elif (defined(G3D_LINUX) || defined(G3D_MINGW32))

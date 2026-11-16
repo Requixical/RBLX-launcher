@@ -8,6 +8,9 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 #include <windows.h>
+#if defined(_MSC_VER) && defined(_M_X64)
+#include <intrin.h>
+#endif
 
 namespace RBX {
 namespace Render {
@@ -50,6 +53,11 @@ static float getShaderModel()
 // FUNCTION: ROBLOX 0x0049cae0
 static __int64 GetCyclesDifference(DelayFunction DelayFunction, unsigned int uiParameter)
 {
+#if defined(_M_X64)
+	const unsigned __int64 start = __rdtsc();
+	DelayFunction(uiParameter);
+	return static_cast<__int64>(__rdtsc() - start);
+#else
 	unsigned int t0Lo, t0Hi;
 	unsigned int t1Lo, t1Hi;
 
@@ -76,6 +84,7 @@ static __int64 GetCyclesDifference(DelayFunction DelayFunction, unsigned int uiP
 	}
 
 	return (__int64) t1Hi * 0x100000000 - ((__int64) t0Hi << 32) - t0Lo + t1Lo;
+#endif
 }
 
 // FUNCTION: WEBSERVICE 0x10169d20

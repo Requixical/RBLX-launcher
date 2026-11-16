@@ -16,6 +16,7 @@ reccmp-build.yml
 *.swp
 WEBSERVICEPROGRESS.*
 *.pyc
+/build64/
 
 WebService.dll
 WebService.pdb

@@ -66,10 +66,14 @@ inline stream_offset fpos_t_to_offset(std::fpos_t pos)
 
 inline stream_offset position_to_offset(std::streampos pos)
 {
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+    return static_cast<stream_offset>(std::streamoff(pos));
+#else
     // Use implementation-specific member function seekpos().
     return fpos_t_to_offset(pos.seekpos()) +
            stream_offset(std::streamoff(pos)) -
            stream_offset(std::streamoff(pos.seekpos()));
+#endif
 }
 
 # else // # if defined(_CPPLIB_VER) //----------------------------------------//

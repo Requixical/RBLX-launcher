@@ -2,8 +2,6 @@ set(CMAKE_CXX_FLAGS "/nologo")
 set(CMAKE_C_FLAGS "/nologo")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/Zi")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Zi")
-set(CMAKE_CXX_FLAGS_RELEASE "")
-set(CMAKE_C_FLAGS_RELEASE "")
 
 set(G3D "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d")
 

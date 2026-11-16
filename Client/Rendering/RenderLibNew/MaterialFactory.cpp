@@ -66,7 +66,7 @@ std::string stringify(double x)
 G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::RenderDevice* rd)
 {
 	if (!loaded) {
-		unsigned int maxColors = std::min(numStrips, BrickColor::colorPalette().size());
+        unsigned int maxColors = std::min(numStrips, static_cast<unsigned int>(BrickColor::colorPalette().size()));
 
 		G3D::GImage image(filename, G3D::GImage::AUTODETECT);
 		G3D::GImage strip(image.width * numStrips, image.height, 3);

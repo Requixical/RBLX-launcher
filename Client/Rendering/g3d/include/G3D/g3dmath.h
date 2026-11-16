@@ -26,6 +26,7 @@
 
 #include "G3D/platform.h"
 #include <ctype.h>
+#include <cmath>
 #include <float.h>
 #include <limits>
 
@@ -66,6 +67,9 @@ namespace G3D {
 */
 
 __inline long int lrint (double flt) {
+#if defined(_M_X64)
+    return static_cast<long int>(std::lrint(flt));
+#else
     int intgr;
 
     _asm {
@@ -74,9 +78,13 @@ __inline long int lrint (double flt) {
     };
 
     return intgr;
+#endif
 }
 
 __inline long int lrintf(float flt) {
+#if defined(_M_X64)
+    return static_cast<long int>(std::lrintf(flt));
+#else
     int intgr;
 
     _asm {
@@ -85,6 +93,7 @@ __inline long int lrintf(float flt) {
     };
 
     return intgr;
+#endif
 }
 #endif
 
@@ -385,7 +394,7 @@ inline float rsq(float x) {
  */
 inline float SSErsq(float x) {
 
-    #if defined(SSE) && defined(G3D_WIN32)
+    #if defined(SSE) && defined(G3D_WIN32) && defined(_M_IX86)
         __asm {
            movss xmm0, x
            rsqrtss xmm0, xmm0

@@ -4,6 +4,13 @@ cmake_policy(SET CMP0091 NEW)
 
 project(openrbx C CXX)
 
+# Remove run-time checks that conflict with optimization flags in modern MSVC.
+foreach(flag_var
+    CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+    string(REGEX REPLACE "/RTC(1|s|u)" "" ${flag_var} "${${flag_var}}")
+endforeach()
+
 if (NOT WIN32)
   message(FATAL_ERROR "Windows is the only supported platform (for now...)")
 endif()
@@ -18,9 +25,10 @@ if (NOT bits EQUAL 32)
   message(WARNING "Only 32-bit binaries are supported")
 endif()
 
-if (NOT MSVC OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14.0" OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15.0")
-  message(FATAL_ERROR "RBXDecomp builds with Visual C++ 8.0 SP1 only")
-endif()
+# Disabled to allow building with Visual Studio 2022 (MSVC v143)
+# if (NOT MSVC OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14.0" OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15.0")
+#   message(FATAL_ERROR "RBXDecomp builds with Visual C++ 8.0 SP1 only")
+# endif()
 
 function(openrbx_compile_defaults NAME)
   target_compile_options(${NAME} PRIVATE /W3)
@@ -412,6 +420,7 @@ set(OPENRBX_COMMON_DEFINITIONS
   WIN32
   NDEBUG
   _LIB
+  _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
   _VC80_UPGRADE=0x0710
   _MBCS
 )
@@ -463,6 +472,7 @@ set(OPENRBX_LUA_SOURCES
   "${PROJECT_SOURCE_DIR}/Client/App/lua-5.1.1/src/lvm.c"
   "${PROJECT_SOURCE_DIR}/Client/App/lua-5.1.1/src/lzio.c"
 )
+set_source_files_properties(${OPENRBX_LUA_SOURCES} PROPERTIES LANGUAGE CXX)
 
 add_engine_library(lua
   DEFINITIONS _CRT_SECURE_NO_WARNINGS _RELEASE
@@ -735,7 +745,7 @@ add_engine_library(appdraw_client
 )
 
 add_engine_library(renderlib
-  OPTIONS /O2 /Wp64
+  OPTIONS /O2
   SOURCES ${OPENRBX_RENDERLIB_SOURCES}
 )
 
@@ -751,7 +761,7 @@ add_engine_library(rbxviewnew
 )
 
 add_engine_library(renderlibnew
-  OPTIONS /O2 /Wp64
+  OPTIONS /O2
   SOURCES ${OPENRBX_RENDERLIBNEW_SOURCES}
 )
 
@@ -862,7 +872,7 @@ set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
 file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
 add_custom_command(
   OUTPUT "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h" "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-  COMMAND midl /nologo /env win32 /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
+  COMMAND midl /nologo /env x64 /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
           "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
   DEPENDS "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
   WORKING_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}"
@@ -955,8 +965,6 @@ add_dependencies(roblox fmodex_dll)
 target_link_libraries(roblox PRIVATE
   toolkitpro
   rgmain
-  mfc80
-  mfcs80
   ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
   ${OPENRBX_G3D_LIBS}
   ${OPENRBX_BOOST_LIBS}
@@ -976,8 +984,8 @@ target_link_libraries(roblox PRIVATE
   wininet
   winmm
   ws2_32
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dinput8.lib"
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dxguid.lib"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x64/dinput8.lib"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x64/dxguid.lib"
 )
 add_dependencies(roblox app app_reflection app_signal app_tail)
 
@@ -1031,15 +1039,15 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL}")
 
-set(CMAKE_STATIC_LINKER_FLAGS "/machine:I386")
+set(CMAKE_STATIC_LINKER_FLAGS "/machine:X64")
 
-set(CMAKE_SHARED_LINKER_FLAGS "/machine:I386")
+set(CMAKE_SHARED_LINKER_FLAGS "/machine:X64")
 set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/incremental:yes /debug")
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/incremental:no")
 set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "/incremental:no /debug")
 set(CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "/incremental:no")
 
-set(CMAKE_EXE_LINKER_FLAGS "/machine:I386")
+set(CMAKE_EXE_LINKER_FLAGS "/machine:X64")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/incremental:yes /debug")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/incremental:no")
 set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/incremental:no /debug")
